@@ -31,7 +31,7 @@ router.delete(
 			.normalizeEmail()
 			.custom(async (value, { req }) => {
 				const authorDoc = await Author.findOne({ email: value });
-				if (authorDoc) return Promise.reject("E-Mail doesn't exists!");
+				if (!authorDoc) return Promise.reject("E-Mail doesn't exists!");
 			}),
 	],
 	authorController.deleteAuthor
