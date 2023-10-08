@@ -2,12 +2,13 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const MONGOURL =
-	"mongodb://localhost:27017/messages";
+	"mongodb://localhost:27017/";
 
-const feedRoutes = require("./routes/feed");
+const authorRoutes = require("./routes/author");
+const blogRoutes = require("./routes/blog");
+const commentRoutes = require("./routes/comment");
 
 const app = express();
-
 
 app.use((req, res, next) => {
 	res.setHeader("Access-Control-Allow-Origin", "*");
@@ -15,12 +16,14 @@ app.use((req, res, next) => {
 		"Access-Control-Allow-Methods",
 		"OPTIONS, GET, POST, PUT, PATCH, DELETE"
 	);
-	res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+	res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 	next();
 });
-// app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
-app.use(bodyParser.json()); // application/json
-app.use("/auth", authRoutes);
+
+app.use(bodyParser.json());
+app.use("/author", authorRoutes);
+app.use("/blog", blogRoutes);
+app.use("/comment", commentRoutes);
 
 app.use((error, req, res, next) => {
 	const status = error.statusCode || 500;

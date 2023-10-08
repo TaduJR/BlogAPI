@@ -16,6 +16,16 @@ const blogSchema = new Schema(
 			ref: "Author",
 			required: true,
 		},
+		like: {
+			type: Number,
+			default: 0,
+			required: true,
+		},
+		view: {
+			type: Number,
+			default: 0,
+			required: true,
+		},
 	}
 );
 
