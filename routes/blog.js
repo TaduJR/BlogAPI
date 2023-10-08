@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const blogController = require("../controllers/author");
+const blogController = require("../controllers/blog");
 const { body } = require("express-validator");
 const Blog = require("../models/blog");
+const Author = require("../models/author");
 
-router.post("/", blogController.postFetch);
 router.post(
 	"/create",
 	[
@@ -15,8 +15,9 @@ router.post(
 			.isEmail()
 			.withMessage("Please enter a valid email.")
 			.custom(async (value, { req }) => {
-				const blogDoc = await Blog.findOne({ email: value });
+				const blogDoc = await Author.findOne({ email: value });
 				if (!blogDoc) return Promise.reject("E-Mail don't exists!");
+				else req._id = blogDoc._id;
 			})
 			.normalizeEmail(),
 	],
@@ -30,7 +31,7 @@ router.put(
 		.custom(async (value) => {
 			const blogDoc = await Blog.findOne({ email: value });
 			if (blogDoc) return Promise.reject("E-Mail address already exists!");
-		}).
+		}),
         body("title").trim().notEmpty(),
 		body("content").trim().notEmpty(),
 		body("email")
@@ -38,25 +39,22 @@ router.put(
 			.isEmail()
 			.withMessage("Please enter a valid email.")
 			.custom(async (value, { req }) => {
-				const blogDoc = await Blog.findOne({ email: value });
+				const blogDoc = await Blog.findOne({ email: value })
 				if (blogDoc) return Promise.reject("E-Mail address already exists!");
 			})
 			.normalizeEmail(),
 	],
-	blogController.putBlog
+	blogController.updateBlog
 );
 
-router.post(
+router.delete(
 	"/delete",
 	[
-		body("email")
-			.trim()
-			.isEmail()
-			.withMessage("Please enter a valid email.")
-			.normalizeEmail()
+		body("blogId")
+			.isMongoId()
 			.custom(async (value) => {
 				const blogDoc = await Blog.findOne({ email: value });
-				if (blogDoc) return Promise.reject("E-Mail doesn't exists!");
+				if (!blogDoc) return Promise.reject("Blog doesn't exists!");
 			}),
 	],
 	blogController.deleteBlog

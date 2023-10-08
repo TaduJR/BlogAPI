@@ -6,7 +6,7 @@ exports.postAuthor = async function (req,res, next) {
 	if (!errors.isEmpty()) {
 		const error = new Error("Validation failed entered data is incorrect.");
 		error.statusCode = 422;
-		throw error;
+		return next(error);
 	}
 
     const fullname = req.body.fullname;
@@ -35,7 +35,7 @@ exports.deleteAuthor = async function (req,res, next) {
 	if (!errors.isEmpty()) {
 		const error = new Error("Validation failed entered data is incorrect.");
 		error.statusCode = 422;
-		throw error;
+		return next(error);
 	}
 
     const email = req.body.email;
@@ -43,7 +43,7 @@ exports.deleteAuthor = async function (req,res, next) {
 	try {
         const author = await Author.findOneAndDelete({email});
         res.status(201).json({
-			message: "Author deleted successfully!",
+			message: "Author created successfully!",
 			author
 		});
 	} catch (err) {
