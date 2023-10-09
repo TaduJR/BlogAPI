@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const MONGOURL =
-	"mongodb://localhost:27017/bloggingsystem";
+	"YOUR_API";
 
 const authorRoutes = require("./routes/author");
 const blogRoutes = require("./routes/blog");
