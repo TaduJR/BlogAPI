@@ -18,12 +18,14 @@ exports.postBlog = async function (req,res, next) {
         const blog = new Blog({
             title,
             content,
-            author: req._id
+            author: new ObjectId(req._id)
         });
+
         const author = await Author.findById(req._id);
-        console.log(author.posts.push(new ObjectId(blog._id)));
+        author.posts.push(new ObjectId(blog._id));
         await author.save();
         await blog.save();
+
         res.status(201).json({
 			message: "Blog created successfully!",
 			author
@@ -42,18 +44,16 @@ exports.updateBlog = async function (req,res, next) {
         console.log(errors)
 		return next(error);
 	}
-
-    const blogId = req.body.blogId;
-    const blog = Blog.findById(blogId);
-    blog.title = req.body.title;
-    blog.content = req.body.content;
     
 	try {
-        const author = await Author.findOneAndDelete({email});
+		const blogId = req.body.blogId;
+		const blog = await Blog.findById(blogId);
+		blog.title = req.body.title;
+		blog.content = req.body.content;
         await blog.save();
         res.status(201).json({
 			message: "Blog updated successfully!",
-			author
+			blog
 		});
 	} catch (err) {
 		if (!err.statusCode) err.statusCode = 500;
@@ -66,12 +66,23 @@ exports.deleteBlog = async function(req, res, next) {
 	if (!errors.isEmpty()) {
 		const error = new Error("Validation failed entered data is incorrect.");
 		error.statusCode = 422;
+		console.log(errors)
 		return next(error);
 	}
 
     const blogId = req.body.blogId;
 	try {
-        const author = await Author.findOneAndDelete({email});
+		const blog = await Blog.findById(blogId);
+        const author = await Author.findById(blog.author);
+		const blogIndex = author.posts.findIndex((value, index) => {
+			return value.toString() === blog._id.toString();
+		})
+		console.log(`Blog Index ${blogIndex}`)
+		await Blog.findByIdAndRemove(blog._id);
+		author.posts.splice(blogIndex, 1);
+
+		await author.save();
+		await blog.save();
         res.status(201).json({
 			message: "Author created successfully!",
 			author

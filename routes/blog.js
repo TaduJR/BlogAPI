@@ -29,20 +29,11 @@ router.put(
 	[
 		body("blogId").trim().notEmpty().isMongoId()
 		.custom(async (value) => {
-			const blogDoc = await Blog.findOne({ email: value });
-			if (blogDoc) return Promise.reject("E-Mail address already exists!");
+			const blogDoc = await Blog.findById(value );
+			if (!blogDoc) return Promise.reject("BlogId doesn't exists!");
 		}),
         body("title").trim().notEmpty(),
 		body("content").trim().notEmpty(),
-		body("email")
-			.trim()
-			.isEmail()
-			.withMessage("Please enter a valid email.")
-			.custom(async (value, { req }) => {
-				const blogDoc = await Blog.findOne({ email: value })
-				if (blogDoc) return Promise.reject("E-Mail address already exists!");
-			})
-			.normalizeEmail(),
 	],
 	blogController.updateBlog
 );
@@ -53,8 +44,9 @@ router.delete(
 		body("blogId")
 			.isMongoId()
 			.custom(async (value) => {
-				const blogDoc = await Blog.findOne({ email: value });
+				const blogDoc = await Blog.findById(value);
 				if (!blogDoc) return Promise.reject("Blog doesn't exists!");
+				console.log(blogDoc)
 			}),
 	],
 	blogController.deleteBlog
