@@ -46,10 +46,34 @@ router.delete(
 			.custom(async (value) => {
 				const blogDoc = await Blog.findById(value);
 				if (!blogDoc) return Promise.reject("Blog doesn't exists!");
-				console.log(blogDoc)
 			}),
 	],
 	blogController.deleteBlog
 );
 
+router.post(
+	"/like",
+	[
+		body("blogId")
+			.isMongoId()
+			.custom(async (value) => {
+				const blogDoc = await Blog.findById(value);
+				if (!blogDoc) return Promise.reject("Blog doesn't exists!");
+			}),
+	],
+	blogController.postLikeBlog
+);
+
+router.get(
+	"/",
+	[
+		body("blogId")
+			.isMongoId()
+			.custom(async (value) => {
+				const blogDoc = await Blog.findById(value);
+				if (!blogDoc) return Promise.reject("Blog doesn't exists!");
+			})
+	],
+	blogController.getBlog
+);
 module.exports = router;

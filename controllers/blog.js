@@ -92,3 +92,50 @@ exports.deleteBlog = async function(req, res, next) {
 		next(err);
 	}
 }
+
+exports.postLikeBlog = async function (req, res, next) {
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		const error = new Error("Validation failed entered data is incorrect.");
+		error.statusCode = 422;
+		console.log(errors)
+		return next(error);
+	}
+	
+	const blogId = req.body.blogId;
+	try {
+		const blog = await Blog.findById(blogId);
+		blog.like++;
+		await blog.save();
+		res.status(201).json({
+			message: "Blog liked successfully!"
+		});
+	} catch (err) {
+		if (!err.statusCode) err.statusCode = 500;
+		next(err);
+	}
+}
+
+exports.getBlog = async function (req, res, next) {
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		const error = new Error("Validation failed entered data is incorrect.");
+		error.statusCode = 422;
+		console.log(errors)
+		return next(error);
+	}
+	
+	const blogId = req.body.blogId;
+	try {
+		const blog = await Blog.findById(blogId);
+		blog.view++;
+		await blog.save();
+		res.status(201).json({
+			message: "Blog viewed successfully!",
+			blog
+		});
+	} catch (err) {
+		if (!err.statusCode) err.statusCode = 500;
+		next(err);
+	}
+}

@@ -7,16 +7,17 @@ const commentSchema = new Schema(
             type: String,
             required: true,
         },
-		comment: {
-            type: String,
+		comments: {
+            type: Array,
             required: true,
+			default: []
         },
 		blogId: {
 			type: Schema.Types.ObjectId,
-			ref: "User",
+			ref: "Blog",
 			required: true,
 		},
 	}
 );
 
-module.exports = mongoose.model("User", commentSchema);
+module.exports = mongoose.model("Comment", commentSchema);

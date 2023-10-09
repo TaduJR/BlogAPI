@@ -6,7 +6,7 @@ const MONGOURL =
 
 const authorRoutes = require("./routes/author");
 const blogRoutes = require("./routes/blog");
-// const commentRoutes = require("../routes/comment");
+const commentRoutes = require("./routes/comment");
 
 const app = express();
 
@@ -23,7 +23,7 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 app.use("/author", authorRoutes);
 app.use("/blog", blogRoutes);
-// app.use("/comment", commentRoutes);
+app.use("/comment", commentRoutes);
 
 app.use((error, req, res, next) => {
 	const status = error.statusCode || 500;
