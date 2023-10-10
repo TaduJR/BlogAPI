@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-dotenv.config({ path: "dotenv"});
+dotenv.config();
 
 const authorRoutes = require("./routes/author");
 const blogRoutes = require("./routes/blog");
@@ -34,8 +34,8 @@ app.use((error, req, res, next) => {
   res.status(status).json({ message, errorList ,data });
 });
 
-app.listen(8080, () => {
-  console.log(`Server runnin on port 8080`);
+app.listen(10000, () => {
+  console.log(`Server running on port 10000`);
   mongoose
     .connect(process.env.MONGOURL, { useNewUrlParser: true, useUnifiedTopology: true })
     .then((result) => {
