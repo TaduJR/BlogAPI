@@ -8,7 +8,7 @@
     "start": "nodemon app.js"
   },
   "engines": {
-    "node": ">=18 <19"
+    "node": "18.x"
   },
   "author": "TaduJR",
   "license": "ISC",
