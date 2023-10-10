@@ -1,7 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const MONGOURL = "";
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -38,7 +37,7 @@ app.use((error, req, res, next) => {
 app.listen(8080, () => {
   console.log(`Server runnin on port 8080`);
   mongoose
-    .connect(process.env.MONGOURL)
+    .connect(process.env.MONGOURL, { useNewUrlParser: true })
     .then((result) => {
       console.log("DB Connected");
     })
