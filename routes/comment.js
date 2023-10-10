@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const { body } = require("express-validator");
 const commentController = require("../controllers/comment");
-const Comment = require("../models/comment");
 
 router.post(
 	"/create",
