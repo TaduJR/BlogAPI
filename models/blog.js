@@ -27,6 +27,7 @@ const blogSchema = new Schema({
       required: true,
     },
   ],
+  comment: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
 });
 
 module.exports = mongoose.model("Blog", blogSchema);

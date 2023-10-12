@@ -1,6 +1,29 @@
 const { validationResult } = require("express-validator");
 const Author = require("../models/author");
 
+exports.getAuthor = async function (req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error(errors.array());
+    error.statusCode = 422;
+    return next(error);
+  }
+
+  const id = req.params.id;
+  try {
+    const author = await Author.findById(id);
+    // const fname = author.fname;
+    // const lname = author.lname;
+    // const email = author.email;
+    // const blog = author.blogs;
+
+    res.status(201).json({});
+  } catch (err) {
+    if (!err.statusCode) err.statusCode = 500;
+    next(err);
+  }
+};
+
 exports.postAuthor = async function (req, res, next) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

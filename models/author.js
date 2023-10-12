@@ -10,15 +10,11 @@ const authorSchema = new Schema({
     type: String,
     required: true,
   },
-  username: {
-    type: String,
-    required: true,
-  },
   email: {
     type: String,
     required: true,
+    unique: true,
   },
-  posts: [{ type: Schema.Types.ObjectId, ref: "Blog" }],
 });
 
 module.exports = mongoose.model("Author", authorSchema);

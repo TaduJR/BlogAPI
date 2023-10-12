@@ -13,7 +13,14 @@ const userSchema = new Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
   },
+  comment: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Comment",
+    },
+  ],
 });
 
 module.exports = mongoose.model("User", authorSchema);
