@@ -2,14 +2,14 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const commentSchema = new Schema({
-  userInfo: {
+  comment: {
     type: String,
     required: true,
   },
-  userComment: {
-    type: Array,
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: "Blog",
     required: true,
-    default: [],
   },
   blogId: {
     type: Schema.Types.ObjectId,
