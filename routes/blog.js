@@ -5,31 +5,42 @@ const { body } = require("express-validator");
 const Blog = require("../models/blog");
 const Author = require("../models/author");
 
+router.get(
+  "/:id",
+  [
+    body("id")
+      .isMongoId()
+      .custom(async (value) => {
+        const blogDoc = await Blog.findById(value);
+        if (!blogDoc) return Promise.reject("Blog doesn't exists!");
+      }),
+  ],
+  blogController.getBlog
+);
+
+router.get("/", blogController.getBlogs);
+
 router.post(
   "/create",
   [
+    body("id")
+      .isMongoId()
+      .withMessage("Please enter a valid id!")
+      .custom(async (value) => {
+        const authorDoc = await Author.findById(value);
+        if (!authorDoc) return Promise.reject("Please enter a valid id!");
+      }),
     body("title").trim().notEmpty(),
     body("content").trim().notEmpty(),
-    body("email")
-      .trim()
-      .isEmail()
-      .withMessage("Please enter a valid email.")
-      .custom(async (value, { req }) => {
-        const blogDoc = await Author.findOne({ email: value });
-        if (!blogDoc) return Promise.reject("E-Mail don't exists!");
-        else req._id = blogDoc._id;
-      })
-      .normalizeEmail(),
   ],
   blogController.postBlog
 );
 
 router.put(
-  "/update",
+  "/update/:id",
   [
-    body("blogId")
+    param("id")
       .trim()
-      .notEmpty()
       .isMongoId()
       .custom(async (value) => {
         const blogDoc = await Blog.findById(value);
@@ -38,13 +49,13 @@ router.put(
     body("title").trim().notEmpty(),
     body("content").trim().notEmpty(),
   ],
-  blogController.updateBlog
+  blogController.putBlog
 );
 
 router.delete(
-  "/delete",
+  "/delete/:id",
   [
-    body("blogId")
+    param("id")
       .isMongoId()
       .custom(async (value) => {
         const blogDoc = await Blog.findById(value);
@@ -55,28 +66,16 @@ router.delete(
 );
 
 router.post(
-  "/like",
+  "/like/:id",
   [
-    body("blogId")
+    body("id")
       .isMongoId()
       .custom(async (value) => {
         const blogDoc = await Blog.findById(value);
         if (!blogDoc) return Promise.reject("Blog doesn't exists!");
       }),
   ],
-  blogController.postLikeBlog
+  blogController.postLike
 );
 
-router.get(
-  "/",
-  [
-    body("blogId")
-      .isMongoId()
-      .custom(async (value) => {
-        const blogDoc = await Blog.findById(value);
-        if (!blogDoc) return Promise.reject("Blog doesn't exists!");
-      }),
-  ],
-  blogController.getBlog
-);
 module.exports = router;

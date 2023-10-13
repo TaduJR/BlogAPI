@@ -19,6 +19,8 @@ module.exports = async function (blogId) {
     };
   });
 
+  blog.like++;
+  await blog.save();
   return {
     authorName: `${authorNames.join(", ")}`,
     authorEmails: `${authorEmails.join(", ")}`,
