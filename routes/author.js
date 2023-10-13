@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authorController = require("../controllers/author");
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const Author = require("../models/author");
 
 router.get(
@@ -21,17 +21,8 @@ router.get(
 router.post(
   "/create",
   [
-    body("fname")
-      .trim()
-      .notEmpty()
-      .isLength({ max: 7 })
-      .withMessage("Max 7 characters allowed."),
-    body("lname")
-      .trim()
-      .notEmpty()
-      .isLength({ max: 7 })
-      .withMessage("Max 7 characters allowed."),
-    ,
+    body("fname").trim().notEmpty(),
+    body("lname").trim().notEmpty(),
     body("email")
       .trim()
       .isEmail()
@@ -39,8 +30,7 @@ router.post(
       .custom(async (value) => {
         const authorDoc = await Author.findOne({ email: value });
         if (authorDoc) return Promise.reject("E-Mail address already exists!");
-      })
-      .normalizeEmail(),
+      }),
   ],
   authorController.postAuthor
 );
@@ -55,41 +45,30 @@ router.put(
         const authorDoc = await Author.findById(value);
         if (!authorDoc) return Promise.reject("Please enter a valid id!");
       }),
-    body("fname")
-      .trim()
-      .notEmpty()
-      .isLength({ max: 7 })
-      .withMessage("Max 7 characters allowed."),
-    body("lname")
-      .trim()
-      .notEmpty()
-      .isLength({ max: 7 })
-      .withMessage("Max 7 characters allowed."),
-    ,
+    body("fname").trim().optional({ values: null }),
+    body("lname").trim().optional({ values: null }),
     body("email")
       .trim()
+      .optional({ values: null })
       .isEmail()
       .withMessage("Please enter a valid email.")
       .custom(async (value) => {
         const authorDoc = await Author.findOne({ email: value });
         if (authorDoc) return Promise.reject("E-Mail address already exists!");
-      })
-      .normalizeEmail(),
+      }),
   ],
   authorController.putAuthor
 );
 
 router.delete(
-  "/delete",
+  "/delete/:id",
   [
-    body("email")
-      .trim()
-      .isEmail()
-      .withMessage("Please enter a valid email.")
-      .normalizeEmail()
-      .custom(async (value, { req }) => {
-        const authorDoc = await Author.findOne({ email: value });
-        if (!authorDoc) return Promise.reject("E-Mail doesn't exists!");
+    param("id")
+      .isMongoId()
+      .withMessage("Please enter a valid id!")
+      .custom(async (value) => {
+        const authorDoc = await Author.findById(value);
+        if (!authorDoc) return Promise.reject("Please enter a valid id!");
       }),
   ],
   authorController.deleteAuthor

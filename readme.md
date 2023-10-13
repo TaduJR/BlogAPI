@@ -1,6 +1,6 @@
 # Intro
 
-- This project is an API that allows users to create, manage, and interact with blog-related content, including authors, blog posts, and comments. This API serves as the backend for a blog platform and offers various endpoints to perform actions such as creating authors, writing and updating blog posts, liking blogs, posting comments, and more.This is the documentation for the Blog API project. This API allows you to manage authors, blogs, and comments.
+- This project is an API that allows authors to create, manage, and interact with their blog-related content, and users. This API serves as the backend for a blog platform and offers various endpoints to perform actions such as creating authors, writing and updating blog posts, liking blogs, posting comments, and more.
 
 # Key Features:
 
@@ -9,6 +9,8 @@
 - Blog Posts: Authors can create and manage blog posts, providing a title, content, and associating it with an author. Users can also like and view blog posts.
 
 - Comments: Users can post comments on specific blog posts, adding their user data and comments to the discussion.
+
+- User:
 
 # Routes
 
