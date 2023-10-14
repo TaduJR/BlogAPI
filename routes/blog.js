@@ -6,9 +6,9 @@ const Blog = require("../models/blog");
 const Author = require("../models/author");
 
 router.get(
-  "/:id",
+  "/:blogId",
   [
-    body("id")
+    body("blogId")
       .isMongoId()
       .custom(async (value) => {
         const blogDoc = await Blog.findById(value);
@@ -23,12 +23,12 @@ router.get("/", blogController.getBlogs);
 router.post(
   "/create",
   [
-    body("id")
+    body("authorId")
       .isMongoId()
       .withMessage("Please enter a valid id!")
       .custom(async (value) => {
         const authorDoc = await Author.findById(value);
-        if (!authorDoc) return Promise.reject("Please enter a valid id!");
+        if (!authorDoc) return Promise.reject("Please enter a valid authorId!");
       }),
     body("title").trim().notEmpty(),
     body("content").trim().notEmpty(),
@@ -37,9 +37,9 @@ router.post(
 );
 
 router.put(
-  "/update/:id",
+  "/update/:blogId",
   [
-    param("id")
+    param("blogId")
       .trim()
       .isMongoId()
       .custom(async (value) => {
@@ -53,9 +53,9 @@ router.put(
 );
 
 router.delete(
-  "/delete/:id",
+  "/delete/:blogId",
   [
-    param("id")
+    param("blogId")
       .isMongoId()
       .custom(async (value) => {
         const blogDoc = await Blog.findById(value);
@@ -66,7 +66,7 @@ router.delete(
 );
 
 router.post(
-  "/like/:id",
+  "/like/:blogId",
   [
     body("id")
       .isMongoId()

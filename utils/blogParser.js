@@ -4,7 +4,7 @@ module.exports = async function (blogId) {
   const blog = await Blog.findById(blogId);
 
   const populatedBlog = await (
-    await (await blog.populate("author")).populate("comment")
+    await (await blog.populate("author")).populate("comments")
   ).populate("userId");
 
   const authorNames = populatedBlog.author.map(
