@@ -8,6 +8,7 @@ router.get(
   [param(userId).trim.isMongoId()],
   userController.getUser
 );
+
 router.post(
   "/create",
   [
