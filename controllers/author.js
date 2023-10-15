@@ -1,23 +1,15 @@
-const { validationResult } = require("express-validator");
-const Author = require("../models/author");
 const blogParser = require("../utils/blogParser");
+const Author = require("../models/author");
 const Blog = require("../models/blog");
 const Comment = require("../models/comment");
 const User = require("../models/user");
 
 exports.getAuthor = async function (req, res, next) {
-  //Check using TestCase
-
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error(errors.array());
-    error.statusCode = 422;
-    return next(error);
-  }
-
   try {
-    const id = req.params.id;
-    const author = await Author.findById(id);
+    const authorId = req.params.authorId;
+    const author = await Author.findById(authorId);
+
+    //FIXME: Test the BlogParser
     const blogLists = author.blogs.map((blog) => blogParser(blog._id));
     res.status(201).json({
       message: "Successfully fetched blogs.",
@@ -30,13 +22,6 @@ exports.getAuthor = async function (req, res, next) {
 };
 
 exports.postAuthor = async function (req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation failed entered data is incorrect.");
-    error.statusCode = 422;
-    return next(error);
-  }
-
   try {
     const fname = req.body.fname;
     const lname = req.body.lname;
@@ -61,16 +46,9 @@ exports.postAuthor = async function (req, res, next) {
 };
 
 exports.putAuthor = async function (req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation failed entered data is incorrect.");
-    error.statusCode = 422;
-    return next(error);
-  }
-
   try {
-    const id = req.params.id;
-    const author = await Author.findById(id);
+    const authorId = req.params.authorId;
+    const author = await Author.findById(authorId);
 
     author.fname = req.body.fname ?? author.fname;
     author.lname = req.body.lname ?? author.lname;
@@ -89,26 +67,20 @@ exports.putAuthor = async function (req, res, next) {
 };
 
 exports.deleteAuthor = async function (req, res, next) {
-  //Unfinished Function
-
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation failed entered data is incorrect.");
-    error.statusCode = 422;
-    return next(error);
-  }
-
   try {
-    const id = req.params.id;
-    const author = await Author.findById(id);
-    const commentIds = Comment.find({ blogId: { $in: author.blogs } }).comment;
+    const authorId = req.params.authorId;
+    const author = await Author.findById(authorId);
+    const blog = await Blog.find({ id: { $in: author.blogs } });
 
-    await Blog.deleteOne({ author: author.id });
-    await User.find({ comment: { $in: commentIds } })
-      .select("comment")
-      .author.blogs.map(async (blogId) => {
-        await Comment.deleteMany({ blogId });
-      });
+    console.log(blog);
+    // const commentIds = Comment.find({ blogId: { $in: author.blogs } }).comment;
+
+    // await Blog.deleteOne({ author: author.id });
+    // await User.find({ comment: { $in: commentIds } })
+    //   .select("comment")
+    //   .author.blogs.map(async (blogId) => {
+    //     await Comment.deleteMany({ blogId });
+    //   });
 
     res.status(201).json({
       message: "Author deleted successfully!",

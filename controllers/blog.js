@@ -1,7 +1,6 @@
 const { validationResult } = require("express-validator");
 const Blog = require("../models/blog");
 const Author = require("../models/author");
-const ObjectId = require("mongoose").Schema.Types.ObjectId;
 
 exports.getBlog = async function (req, res, next) {
   const errors = validationResult(req);
@@ -47,19 +46,20 @@ exports.postBlog = async function (req, res, next) {
     return next(error);
   }
 
+  const authorId = req.body.authorId;
   const title = req.body.title;
   const content = req.body.content;
-  const id = req.body.id;
 
   try {
     const blog = new Blog({
       title,
       content,
-      author: new ObjectId(id),
+      authorId,
     });
 
-    const author = await Author.findById(id);
-    author.posts.push(blog._id);
+    const author = await Author.findById(authorId);
+    author.blogs.push(blog.id);
+    
     await author.save();
     await blog.save();
 

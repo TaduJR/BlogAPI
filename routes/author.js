@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const userController = require("../controllers/author");
+const authorController = require("../controllers/author");
+const Author = require("../models/author");
 const { body, param } = require("express-validator");
-const User = require("../models/author");
+const validatorResult = require("../middleware/validatorResult");
 
 router.get(
   "/:authorId",
@@ -15,7 +16,8 @@ router.get(
         if (!authorDoc) return Promise.reject("Please enter a valid authorId!");
       }),
   ],
-  userController.getAuthor
+  validatorResult,
+  authorController.getAuthor
 );
 
 router.post(
@@ -28,11 +30,15 @@ router.post(
       .isEmail()
       .withMessage("Please enter a valid email.")
       .custom(async (value) => {
-        const userDoc = await User.findOne({ email: value });
-        if (userDoc) return Promise.reject("E-Mail address already exists!");
+        const authorDoc = await Author.findOne({ email: value });
+        if (authorDoc)
+          return Promise.reject(
+            "E-Mail address already exists! Try different one."
+          );
       }),
   ],
-  userController.postAuthor
+  validatorResult,
+  authorController.postAuthor
 );
 
 router.put(
@@ -42,8 +48,8 @@ router.put(
       .isMongoId()
       .withMessage("Please enter a valid authorId!")
       .custom(async (value) => {
-        const userDoc = await User.findById(value);
-        if (!userDoc) return Promise.reject("Please enter a valid authorId!");
+        const authorDoc = await Author.findById(value);
+        if (!authorDoc) return Promise.reject("Please enter a valid authorId!");
       }),
     body("fname").trim().optional({ values: null }),
     body("lname").trim().optional({ values: null }),
@@ -53,11 +59,15 @@ router.put(
       .isEmail()
       .withMessage("Please enter a valid email.")
       .custom(async (value) => {
-        const userDoc = await User.findOne({ email: value });
-        if (userDoc) return Promise.reject("E-Mail address already exists!");
+        const authorDoc = await Author.findOne({ email: value });
+        if (authorDoc)
+          return Promise.reject(
+            "E-Mail address already exists! Try different one."
+          );
       }),
   ],
-  userController.putAuthor
+  validatorResult,
+  authorController.putAuthor
 );
 
 router.delete(
@@ -67,11 +77,12 @@ router.delete(
       .isMongoId()
       .withMessage("Please enter a valid authorId!")
       .custom(async (value) => {
-        const userDoc = await User.findById(value);
-        if (!userDoc) return Promise.reject("Please enter a valid authorId!");
+        const authorDoc = await Author.findById(value);
+        if (!authorDoc) return Promise.reject("Please enter a valid authorId!");
       }),
   ],
-  userController.deleteAuthor
+  validatorResult,
+  authorController.deleteAuthor
 );
 
 module.exports = router;
