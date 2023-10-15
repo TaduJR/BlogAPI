@@ -3,6 +3,7 @@ const Author = require("../models/author");
 const Blog = require("../models/blog");
 const Comment = require("../models/comment");
 const User = require("../models/user");
+const comment = require("../models/comment");
 
 exports.getAuthor = async function (req, res, next) {
   try {
@@ -70,17 +71,23 @@ exports.deleteAuthor = async function (req, res, next) {
   try {
     const authorId = req.params.authorId;
     const author = await Author.findById(authorId);
-    const blog = await Blog.find({ id: { $in: author.blogs } });
+    const blogs = await Blog.find({
+      _id: { $in: author.blogs },
+      $where: "this.authors.length > 1",
+    });
+    const comments = blogs.flatMap((blog) => blog.comments);
 
-    console.log(blog);
-    // const commentIds = Comment.find({ blogId: { $in: author.blogs } }).comment;
+    console.log(author.blogs);
+    console.log(blogs);
+    console.log(comments);
 
-    // await Blog.deleteOne({ author: author.id });
-    // await User.find({ comment: { $in: commentIds } })
-    //   .select("comment")
-    //   .author.blogs.map(async (blogId) => {
-    //     await Comment.deleteMany({ blogId });
-    //   });
+    await Blog.deleteMany({
+      _id: { $in: author.blogs },
+      $where: "this.authors.length > 1",
+    });
+    await Comment.deleteMany({ _id: { $in: comments } });
+    await User.updateMany({}, { $pull: { comments: { $in: comments } } });
+    await (await author.deleteOne()).save();
 
     res.status(201).json({
       message: "Author deleted successfully!",

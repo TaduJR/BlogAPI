@@ -73,7 +73,7 @@ router.put(
 router.delete(
   "/delete/:authorId",
   [
-    param("id")
+    param("authorId")
       .isMongoId()
       .withMessage("Please enter a valid authorId!")
       .custom(async (value) => {
