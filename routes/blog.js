@@ -4,35 +4,40 @@ const blogController = require("../controllers/blog");
 const { body } = require("express-validator");
 const Blog = require("../models/blog");
 const Author = require("../models/author");
+const validatorResult = require("../middleware/validatorResult");
+const { ObjectId } = require("mongoose").Types;
 
-// router.get(
-//   "/:blogId",
-//   [
-//     body("blogId")
-//       .isMongoId()
-//       .custom(async (value) => {
-//         const blogDoc = await Blog.findById(value);
-//         if (!blogDoc) return Promise.reject("Blog doesn't exists!");
-//       }),
-//   ],
-//   blogController.getBlog
-// );
+router.get(
+  "/:blogId",
+  [
+    body("blogId")
+      .isMongoId()
+      .custom(async (value) => {
+        const blogDoc = await Blog.findById(value);
+        if (!blogDoc) return Promise.reject("Blog doesn't exists!");
+      }),
+  ],
+  validatorResult,
+  blogController.getBlog
+);
 
-// router.get("/", blogController.getBlogs);
+router.get("/", blogController.getBlogs);
 
 router.post(
   "/create",
   [
-    body("authorId")
-      .isMongoId()
-      .withMessage("Please enter a valid id!")
-      .custom(async (value) => {
-        const authorDoc = await Author.findById(value);
-        if (!authorDoc) return Promise.reject("Please enter a valid authorId!");
-      }),
+    body("authorIds").custom(async (authorIds) => {
+      await Author.find({
+        _id: { $in: authorIds },
+      }).then((docs) => {
+        if (docs.length !== authorIds.length)
+          return Promise.reject("Please enter a valid authorIds!");
+      });
+    }),
     body("title").trim().notEmpty(),
     body("content").trim().notEmpty(),
   ],
+  validatorResult,
   blogController.postBlog
 );
 
@@ -49,6 +54,7 @@ router.post(
 //     body("title").trim().notEmpty(),
 //     body("content").trim().notEmpty(),
 //   ],
+//   validatorResult,
 //   blogController.putBlog
 // );
 
@@ -62,6 +68,7 @@ router.post(
 //         if (!blogDoc) return Promise.reject("Blog doesn't exists!");
 //       }),
 //   ],
+//   validatorResult,
 //   blogController.deleteBlog
 // );
 
@@ -75,6 +82,7 @@ router.post(
 //         if (!blogDoc) return Promise.reject("Blog doesn't exists!");
 //       }),
 //   ],
+//   validatorResult,
 //   blogController.postLike
 // );
 

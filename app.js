@@ -7,12 +7,11 @@ dotenv.config();
 const MONGOURL = process.env.MONGOURL;
 const PORT = process.env.PORT || 10000;
 const authorRoutes = require("./routes/author");
-// const blogRoutes = require("./routes/blog");
+const blogRoutes = require("./routes/blog");
 // const commentRoutes = require("./routes/comment");
 // const userRoutes = require("./routes/user");
 
 const app = express();
-
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -25,7 +24,7 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 app.use("/author", authorRoutes);
-// app.use("/blog", blogRoutes);
+app.use("/blog", blogRoutes);
 // app.use("/comment", commentRoutes);
 // app.use("/user", userRoutes);
 

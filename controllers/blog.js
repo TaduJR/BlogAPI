@@ -3,16 +3,10 @@ const Blog = require("../models/blog");
 const Author = require("../models/author");
 
 exports.getBlog = async function (req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation failed entered data is incorrect.");
-    error.statusCode = 422;
-    return next(error);
-  }
-
   try {
-    const id = req.param.id;
-    const populatedBlog = await blogParser(id);
+    const blogId = req.param.blogId;
+    //FIXME: Test the BlogParser
+    const populatedBlog = await blogParser(blogId);
 
     res.status(201).json({
       message: "Blog fetched successfully!",
@@ -20,12 +14,14 @@ exports.getBlog = async function (req, res, next) {
     });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
+    next(err);
   }
 };
 
 exports.getBlogs = async function (req, res, next) {
   try {
     const blogIds = await Blog.find().select("id");
+    //FIXME: Test the BlogParser
     const populatedBlogs = blogIds.map((blogId) => blogParser(blogId));
 
     res.status(201).json({
@@ -39,28 +35,24 @@ exports.getBlogs = async function (req, res, next) {
 };
 
 exports.postBlog = async function (req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation failed entered data is incorrect.");
-    error.statusCode = 422;
-    return next(error);
-  }
-
-  const authorId = req.body.authorId;
-  const title = req.body.title;
-  const content = req.body.content;
-
   try {
+    const authorIds = req.body.authorIds;
+    const title = req.body.title;
+    const content = req.body.content;
+
+    console.log(authorIds);
+    console.log(title);
+    console.log(content);
     const blog = new Blog({
       title,
       content,
-      authorId,
+      authorIds,
     });
 
-    const author = await Author.findById(authorId);
-    author.blogs.push(blog.id);
-    
-    await author.save();
+    const author = await Author.updateMany(
+      { _id: { $in: authorIds } },
+      { $push: { blogs: blog.id } }
+    );
     await blog.save();
 
     res.status(201).json({
@@ -73,15 +65,7 @@ exports.postBlog = async function (req, res, next) {
   }
 };
 
-exports.updateBlog = async function (req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation failed entered data is incorrect.");
-    error.statusCode = 422;
-    console.log(errors);
-    return next(error);
-  }
-
+exports.putBlog = async function (req, res, next) {
   try {
     const blogId = req.body.blogId;
     const blog = await Blog.findById(blogId);
@@ -99,14 +83,6 @@ exports.updateBlog = async function (req, res, next) {
 };
 
 exports.deleteBlog = async function (req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation failed entered data is incorrect.");
-    error.statusCode = 422;
-    console.log(errors);
-    return next(error);
-  }
-
   const blogId = req.body.blogId;
   try {
     const blog = await Blog.findById(blogId);
@@ -131,14 +107,6 @@ exports.deleteBlog = async function (req, res, next) {
 };
 
 exports.postLike = async function (req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation failed entered data is incorrect.");
-    error.statusCode = 422;
-    console.log(errors);
-    return next(error);
-  }
-
   try {
     const blogId = req.body.blogId;
     const blog = await Blog.findById(blogId);

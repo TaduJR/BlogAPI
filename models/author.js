@@ -15,7 +15,7 @@ const authorSchema = new Schema({
     required: true,
     unique: true,
   },
-  blogs: [{ type: Schema.Types.ObjectId, ref: "Blog" }],
+  blogs: [{ type: Schema.Types.ObjectId, ref: "Blog", default: [] }],
 });
 
 module.exports = mongoose.model("Author", authorSchema);
