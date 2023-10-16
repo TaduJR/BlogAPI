@@ -65,14 +65,16 @@ exports.putUser = async function (req, res, next) {
 };
 
 exports.deleteUser = async function (req, res, next) {
-  //Unfinished Function
   try {
-    const id = req.param.userId;
-    const user = await User.findById(id);
+    const userId = req.param.userId;
+    const user = await User.findById(userId);
+
+    await Blog.updateMany({ $pull: { comments: { $in: user.comments } } });
+    await Comment.deleteMany({ _id: { $in: user.comments } });
+    (await user.deleteOne()).save();
 
     res.status(201).json({
       message: "User deleted successfully!",
-      user,
     });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
