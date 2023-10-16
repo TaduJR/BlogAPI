@@ -77,10 +77,6 @@ exports.deleteAuthor = async function (req, res, next) {
     });
     const comments = blogs.flatMap((blog) => blog.comments);
 
-    console.log(author.blogs);
-    console.log(blogs);
-    console.log(comments);
-
     await Blog.deleteMany({
       _id: { $in: author.blogs },
       $where: "this.authors.length > 1",

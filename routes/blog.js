@@ -5,6 +5,7 @@ const { body } = require("express-validator");
 const Blog = require("../models/blog");
 const Author = require("../models/author");
 const validatorResult = require("../middleware/validatorResult");
+const author = require("../models/author");
 const { ObjectId } = require("mongoose").Types;
 
 router.get(
@@ -41,22 +42,22 @@ router.post(
   blogController.postBlog
 );
 
-// router.put(
-//   "/update/:blogId",
-//   [
-//     param("blogId")
-//       .trim()
-//       .isMongoId()
-//       .custom(async (value) => {
-//         const blogDoc = await Blog.findById(value);
-//         if (!blogDoc) return Promise.reject("BlogId doesn't exists!");
-//       }),
-//     body("title").trim().notEmpty(),
-//     body("content").trim().notEmpty(),
-//   ],
-//   validatorResult,
-//   blogController.putBlog
-// );
+router.put(
+  "/update/:blogId",
+  [
+    param("blogId")
+      .trim()
+      .isMongoId()
+      .custom(async (value) => {
+        const blogDoc = await Blog.findById(value);
+        if (!blogDoc) return Promise.reject("BlogId doesn't exists!");
+      }),
+    body("title").trim().notEmpty(),
+    body("content").trim().notEmpty(),
+  ],
+  validatorResult,
+  blogController.putBlog
+);
 
 // router.delete(
 //   "/delete/:blogId",

@@ -71,6 +71,7 @@ exports.putBlog = async function (req, res, next) {
     const blog = await Blog.findById(blogId);
     blog.title = req.body.title;
     blog.content = req.body.content;
+
     await blog.save();
     res.status(201).json({
       message: "Blog updated successfully!",
@@ -83,22 +84,21 @@ exports.putBlog = async function (req, res, next) {
 };
 
 exports.deleteBlog = async function (req, res, next) {
-  const blogId = req.body.blogId;
   try {
+    const blogId = req.body.blogId;
     const blog = await Blog.findById(blogId);
-    const author = await Author.findById(blog.author);
-    const blogIndex = author.posts.findIndex((value, index) => {
-      return value.toString() === blog._id.toString();
-    });
-    console.log(`Blog Index ${blogIndex}`);
-    await Blog.findByIdAndRemove(blog._id);
-    author.posts.splice(blogIndex, 1);
+    const authorIds = await Author.find({ blogs: { $in: [blogId] } });
+    const author = await Author.updateMany(
+      { _id: { $in: authorIds } },
+      { $pull: { blogs: blog.id } }
+    );
 
+    await Blog.findByIdAndRemove(blog._id);
     await author.save();
     await blog.save();
     res.status(201).json({
-      message: "Author created successfully!",
-      author,
+      message: "Blog deleted successfully!",
+      blog,
     });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
