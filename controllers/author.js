@@ -82,7 +82,11 @@ exports.deleteAuthor = async function (req, res, next) {
       $where: "this.authors.length > 1",
     });
     await Comment.deleteMany({ _id: { $in: comments } });
-    await User.updateMany({}, { $pull: { comments: { $in: comments } } });
+    await User.updateMany(
+      {},
+      { $pull: { comments: { $in: comments } } },
+      { multi: true }
+    );
     await (await author.deleteOne()).save();
 
     res.status(201).json({

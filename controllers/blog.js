@@ -51,7 +51,8 @@ exports.postBlog = async function (req, res, next) {
 
     const author = await Author.updateMany(
       { _id: { $in: authorIds } },
-      { $push: { blogs: blog.id } }
+      { $push: { blogs: blog.id } },
+      { multi: true }
     );
     await blog.save();
 
@@ -90,7 +91,8 @@ exports.deleteBlog = async function (req, res, next) {
     const authorIds = await Author.find({ blogs: { $in: [blogId] } });
     const author = await Author.updateMany(
       { _id: { $in: authorIds } },
-      { $pull: { blogs: blog.id } }
+      { $pull: { blogs: blog.id } },
+      { multi: true }
     );
 
     await Blog.findByIdAndRemove(blog._id);

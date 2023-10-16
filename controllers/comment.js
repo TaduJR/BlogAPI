@@ -4,14 +4,6 @@ const Blog = require("../models/blog");
 const User = require("../models/user");
 
 exports.getComment = async function (req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation failed entered data is incorrect.");
-    error.statusCode = 422;
-    console.log(errors);
-    return next(error);
-  }
-
   try {
     const commentId = req.param.commentId;
     const comment = await Comment.findById(commentId).populate("userId");
@@ -26,19 +18,11 @@ exports.getComment = async function (req, res, next) {
 };
 
 exports.postComment = async function (req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation failed entered data is incorrect.");
-    error.statusCode = 422;
-    console.log(errors);
-    return next(error);
-  }
-
-  const blogId = req.body.blogId;
-  const userId = req.body.userId;
-  const commentText = req.body.comment;
-
   try {
+    const blogId = req.body.blogId;
+    const userId = req.body.userId;
+    const commentText = req.body.comment;
+
     const blog = await Blog.findById(blogId);
     const user = await User.findById(userId);
     const comment = new Comment({ userId, blogId, comment: commentText });
@@ -59,14 +43,6 @@ exports.postComment = async function (req, res, next) {
 };
 
 exports.putComment = async function (req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation failed entered data is incorrect.");
-    error.statusCode = 422;
-    console.log(errors);
-    return next(error);
-  }
-
   try {
     const commentId = req.param.commentId;
     const commentText = req.body.comment;
@@ -75,7 +51,7 @@ exports.putComment = async function (req, res, next) {
     await comment.save();
 
     res.status(201).json({
-      message: "Comment fetched successfully!",
+      message: "Comment updated successfully!",
       comment,
     });
   } catch (err) {
@@ -85,19 +61,19 @@ exports.putComment = async function (req, res, next) {
 };
 
 exports.deleteComment = async function (req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation failed entered data is incorrect.");
-    error.statusCode = 422;
-    console.log(errors);
-    return next(error);
-  }
-
   try {
     const commentId = req.param.commentId;
     const comment = await Comment.findByIdAndDelete(commentId);
-    await Blog.update({}, { $pull: { comments: commentId } }, { multi: true });
-    await User.update({}, { $pull: { comments: commentId } }, { multi: true });
+    await Blog.updateMany(
+      {},
+      { $pull: { comments: commentId } },
+      { multi: true }
+    );
+    await User.updateMany(
+      {},
+      { $pull: { comments: commentId } },
+      { multi: true }
+    );
     await comment.save();
 
     res.status(201).json({
