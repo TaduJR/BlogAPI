@@ -117,7 +117,7 @@ exports.deleteBlog = async function (req, res, next) {
 
 exports.postLike = async function (req, res, next) {
   try {
-    const blogId = req.body.blogId;
+    const blogId = req.params.blogId;
     const blog = await Blog.findById(blogId);
     blog.like++;
     await blog.save();
