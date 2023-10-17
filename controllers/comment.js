@@ -1,12 +1,13 @@
-const { validationResult } = require("express-validator");
 const Comment = require("../models/comment");
 const Blog = require("../models/blog");
 const User = require("../models/user");
 
 exports.getComment = async function (req, res, next) {
   try {
-    const commentId = req.param.commentId;
-    const comment = await Comment.findById(commentId).populate("userId");
+    const commentId = req.params.commentId;
+    const comment = await Comment.findById(commentId)
+      .populate("user")
+      .populate("blog");
     res.status(201).json({
       message: "Comment fetched successfully!",
       comment,
@@ -35,6 +36,7 @@ exports.postComment = async function (req, res, next) {
     await blog.save();
     res.status(201).json({
       message: "Comment created successfully!",
+      comment,
     });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
@@ -44,7 +46,7 @@ exports.postComment = async function (req, res, next) {
 
 exports.putComment = async function (req, res, next) {
   try {
-    const commentId = req.param.commentId;
+    const commentId = req.params.commentId;
     const commentText = req.body.comment;
     const comment = await Comment.findById(commentId);
     comment.comment = commentText;
@@ -62,7 +64,7 @@ exports.putComment = async function (req, res, next) {
 
 exports.deleteComment = async function (req, res, next) {
   try {
-    const commentId = req.param.commentId;
+    const commentId = req.params.commentId;
     const comment = await Comment.findByIdAndDelete(commentId);
     await Blog.updateMany(
       {},
@@ -74,7 +76,6 @@ exports.deleteComment = async function (req, res, next) {
       { $pull: { comments: commentId } },
       { multi: true }
     );
-    await comment.save();
 
     res.status(201).json({
       message: "Comment deleted successfully!",

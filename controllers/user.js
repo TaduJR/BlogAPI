@@ -1,4 +1,3 @@
-const { validationResult } = require("express-validator");
 const blogParser = require("../utils/blogParser");
 const Author = require("../models/author");
 const Blog = require("../models/blog");
@@ -7,7 +6,7 @@ const User = require("../models/user");
 
 exports.getUser = async function (req, res, next) {
   try {
-    const id = req.param.userId;
+    const id = req.params.userId;
     const user = await User.findById(id).populate("comments");
     res.status(201).json({
       message: "Successfully fetched user.",
@@ -45,8 +44,8 @@ exports.postUser = async function (req, res, next) {
 
 exports.putUser = async function (req, res, next) {
   try {
-    const id = req.param.userId;
-    const user = await User.findById(id);
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
 
     user.fname = req.body.fname ?? user.fname;
     user.lname = req.body.lname ?? user.lname;
@@ -66,12 +65,12 @@ exports.putUser = async function (req, res, next) {
 
 exports.deleteUser = async function (req, res, next) {
   try {
-    const userId = req.param.userId;
+    const userId = req.params.userId;
     const user = await User.findById(userId);
 
     await Blog.updateMany({ $pull: { comments: { $in: user.comments } } });
     await Comment.deleteMany({ _id: { $in: user.comments } });
-    (await user.deleteOne()).save();
+    await User.findByIdAndDelete(userId);
 
     res.status(201).json({
       message: "User deleted successfully!",

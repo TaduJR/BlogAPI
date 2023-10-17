@@ -3,16 +3,17 @@ const Author = require("../models/author");
 const Blog = require("../models/blog");
 const Comment = require("../models/comment");
 const User = require("../models/user");
-const comment = require("../models/comment");
 
 exports.getAuthor = async function (req, res, next) {
   try {
     const authorId = req.params.authorId;
     const author = await Author.findById(authorId);
 
-    //FIXME: Test the BlogParser
-    const blogLists = author.blogs.map((blog) => blogParser(blog._id));
-    res.status(201).json({
+    let blogLists = [];
+    for (const blog of author.blogs) {
+      blogLists.push(await blogParser(blog._id));
+    }
+    res.status(200).json({
       message: "Successfully fetched blogs.",
       blogLists,
     });
@@ -87,11 +88,10 @@ exports.deleteAuthor = async function (req, res, next) {
       { $pull: { comments: { $in: comments } } },
       { multi: true }
     );
-    await (await author.deleteOne()).save();
+    await Author.findByIdAndDelete(authorId);
 
     res.status(201).json({
       message: "Author deleted successfully!",
-      author,
     });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;

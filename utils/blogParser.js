@@ -4,23 +4,24 @@ module.exports = async function (blogId) {
   const blog = await Blog.findById(blogId);
 
   const populatedBlog = await (
-    await (await blog.populate("author")).populate("comments")
-  ).populate("userId");
+    await (await blog.populate("authors")).populate("comments")
+  ).populate("comments.user");
 
-  const authorNames = populatedBlog.author.map(
+  const authorNames = populatedBlog.authors.map(
     (author) => `${author.fname} ${author.lname}`
   );
-  const authorEmails = populatedBlog.author.map((author) => `${author.email}`);
-  const commentList = populatedBlog.comment.map((comment) => {
+  const authorEmails = populatedBlog.authors.map((author) => `${author.email}`);
+  const commentList = populatedBlog.comments.map((comment) => {
     return {
-      comments: comment.comment,
-      userFullName: `${comment.fname} ${comment.lname}`,
-      userEmail: comment.email,
+      comment: comment.comment,
+      userFullName: `${comment.user.fname} ${comment.user.lname}`,
+      userEmail: comment.user.email,
     };
   });
 
-  blog.like++;
+  blog.view++;
   await blog.save();
+
   return {
     authorName: `${authorNames.join(", ")}`,
     authorEmails: `${authorEmails.join(", ")}`,

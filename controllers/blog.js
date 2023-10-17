@@ -1,11 +1,12 @@
-const { validationResult } = require("express-validator");
 const Blog = require("../models/blog");
 const Author = require("../models/author");
+const Comment = require("../models/comment");
+const User = require("../models/user");
+const blogParser = require("../utils/blogParser");
 
 exports.getBlog = async function (req, res, next) {
   try {
-    const blogId = req.param.blogId;
-    //FIXME: Test the BlogParser
+    const blogId = req.params.blogId;
     const populatedBlog = await blogParser(blogId);
 
     res.status(201).json({
@@ -21,12 +22,14 @@ exports.getBlog = async function (req, res, next) {
 exports.getBlogs = async function (req, res, next) {
   try {
     const blogIds = await Blog.find().select("id");
-    //FIXME: Test the BlogParser
-    const populatedBlogs = blogIds.map((blogId) => blogParser(blogId));
+    let blogLists = [];
+    for (const blog of blogIds) {
+      blogLists.push(await blogParser(blog._id));
+    }
 
     res.status(201).json({
       message: "Blog fetched successfully!",
-      populatedBlogs,
+      blogLists,
     });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
@@ -40,16 +43,13 @@ exports.postBlog = async function (req, res, next) {
     const title = req.body.title;
     const content = req.body.content;
 
-    console.log(authorIds);
-    console.log(title);
-    console.log(content);
     const blog = new Blog({
       title,
       content,
-      authorIds,
+      authors: authorIds,
     });
 
-    const author = await Author.updateMany(
+    await Author.updateMany(
       { _id: { $in: authorIds } },
       { $push: { blogs: blog.id } },
       { multi: true }
@@ -58,7 +58,7 @@ exports.postBlog = async function (req, res, next) {
 
     res.status(201).json({
       message: "Blog created successfully!",
-      author,
+      blog,
     });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
@@ -68,10 +68,10 @@ exports.postBlog = async function (req, res, next) {
 
 exports.putBlog = async function (req, res, next) {
   try {
-    const blogId = req.body.blogId;
+    const blogId = req.params.blogId;
     const blog = await Blog.findById(blogId);
-    blog.title = req.body.title;
-    blog.content = req.body.content;
+    blog.title = req.body.title ?? blog.title;
+    blog.content = req.body.content ?? blog.content;
 
     await blog.save();
     res.status(201).json({
@@ -86,18 +86,25 @@ exports.putBlog = async function (req, res, next) {
 
 exports.deleteBlog = async function (req, res, next) {
   try {
-    const blogId = req.body.blogId;
+    const blogId = req.params.blogId;
     const blog = await Blog.findById(blogId);
-    const authorIds = await Author.find({ blogs: { $in: [blogId] } });
-    const author = await Author.updateMany(
+    const authors = await Author.find({ blogs: { $in: [blogId] } });
+    const authorIds = authors.map((author) => author.id);
+
+    await Author.updateMany(
       { _id: { $in: authorIds } },
       { $pull: { blogs: blog.id } },
       { multi: true }
     );
 
-    await Blog.findByIdAndRemove(blog._id);
-    await author.save();
-    await blog.save();
+    await Comment.deleteMany({ _id: { $in: blog.comments } });
+    await User.updateMany(
+      {},
+      { $pull: { comments: { $in: blog.comments } } },
+      { multi: true }
+    );
+    await Blog.findByIdAndRemove(blog.id);
+
     res.status(201).json({
       message: "Blog deleted successfully!",
       blog,

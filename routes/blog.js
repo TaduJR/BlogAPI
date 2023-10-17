@@ -1,17 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const blogController = require("../controllers/blog");
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const Blog = require("../models/blog");
 const Author = require("../models/author");
 const validatorResult = require("../middleware/validatorResult");
-const author = require("../models/author");
-const { ObjectId } = require("mongoose").Types;
 
 router.get(
   "/:blogId",
   [
-    body("blogId")
+    param("blogId")
       .isMongoId()
       .custom(async (value) => {
         const blogDoc = await Blog.findById(value);
@@ -52,39 +50,39 @@ router.put(
         const blogDoc = await Blog.findById(value);
         if (!blogDoc) return Promise.reject("BlogId doesn't exists!");
       }),
-    body("title").trim().notEmpty(),
-    body("content").trim().notEmpty(),
+    body("title").trim().optional({ values: null }),
+    body("content").trim().optional({ values: null }),
   ],
   validatorResult,
   blogController.putBlog
 );
 
-// router.delete(
-//   "/delete/:blogId",
-//   [
-//     param("blogId")
-//       .isMongoId()
-//       .custom(async (value) => {
-//         const blogDoc = await Blog.findById(value);
-//         if (!blogDoc) return Promise.reject("Blog doesn't exists!");
-//       }),
-//   ],
-//   validatorResult,
-//   blogController.deleteBlog
-// );
+router.delete(
+  "/delete/:blogId",
+  [
+    param("blogId")
+      .isMongoId()
+      .custom(async (value) => {
+        const blogDoc = await Blog.findById(value);
+        if (!blogDoc) return Promise.reject("Blog doesn't exists!");
+      }),
+  ],
+  validatorResult,
+  blogController.deleteBlog
+);
 
-// router.post(
-//   "/like/:blogId",
-//   [
-//     body("id")
-//       .isMongoId()
-//       .custom(async (value) => {
-//         const blogDoc = await Blog.findById(value);
-//         if (!blogDoc) return Promise.reject("Blog doesn't exists!");
-//       }),
-//   ],
-//   validatorResult,
-//   blogController.postLike
-// );
+router.post(
+  "/like/:blogId",
+  [
+    body("id")
+      .isMongoId()
+      .custom(async (value) => {
+        const blogDoc = await Blog.findById(value);
+        if (!blogDoc) return Promise.reject("Blog doesn't exists!");
+      }),
+  ],
+  validatorResult,
+  blogController.postLike
+);
 
 module.exports = router;

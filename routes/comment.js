@@ -13,7 +13,7 @@ router.get(
         if (!commentDoc) return Promise.reject("Comment doesn't exists!");
       }),
   ],
-  blogController.getComment
+  commentController.getComment
 );
 
 router.post(
