@@ -74,7 +74,7 @@ router.delete(
 router.post(
   "/like/:blogId",
   [
-    body("id")
+    param("blogId")
       .isMongoId()
       .custom(async (value) => {
         const blogDoc = await Blog.findById(value);
